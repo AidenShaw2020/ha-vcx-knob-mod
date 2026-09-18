@@ -48,7 +48,8 @@ class VCXKnobSensor(SensorEntity):
             "model": "VCX-Knob Smart Toilet",
         }
         self._attr_should_poll = False
-
+        if description.key not in {"device_address", "rssi"}:
+            self._attr_entity_registry_enabled_default = False
     async def async_added_to_hass(self) -> None:
         await super().async_added_to_hass()
         self.async_on_remove(self._coordinator.async_add_listener(self._handle_coordinator_update))

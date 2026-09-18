@@ -1,282 +1,322 @@
 {
-  "config": {
-    "step": {
-      "user": {
-        "title": "Nastavení VCX-Knob Smart Toilet",
-        "description": "Vyhledej blízká zařízení VCX-Knob přes Bluetooth.",
-        "data": {}
-      },
-      "scan": {
-        "title": "Vyhledávání zařízení",
-        "description": "Vyhledávají se blízká zařízení {device_name}. Nech zařízení zapnuté a v dosahu Bluetooth."
-      },
-      "select_device": {
-        "title": "Výběr zařízení",
-        "description": "Vyber zařízení VCX-Knob, které chceš přidat.",
-        "data": {
-          "device_address": "Nalezená zařízení"
-        }
-      },
-      "pair": {
-        "title": "Spárování zařízení",
-        "description": "U zařízení, která vyžadují Bluetooth párování, je spárování nutné pro zápis příkazů. Automatické párování používá lokální nástroj `bluetoothctl`. Pomocné Bluetooth akce jsou v této upravené verzi dostupné pouze administrátorům.\n\n**Zařízení:** {device_name}\n**Adresa:** {device_address}\n**Signál:** {rssi} dBm\n\nOdesláním se integrace pokusí zařízení spárovat. Pokud standardní párování zařízení nepodporuje, nastavení může pokračovat a párování lze provést později ručně."
-      },
-      "confirm": {
-        "title": "Potvrzení zařízení",
-        "description": "Nalezeno **{device_name}** na adrese **{device_address}**, síla signálu **{rssi} dBm**.",
-        "data": {
-          "device_name": "Název zařízení",
-          "auto_connect": "Automaticky se připojovat k zařízení"
-        }
-      }
-    },
-    "error": {
-      "cannot_connect": "K zařízení se nepodařilo připojit. Zkontroluj napájení, dosah a párování.",
-      "no_devices_found": "Nebyla nalezena žádná zařízení VCX-Knob.",
-      "scan_failed": "Vyhledávání Bluetooth selhalo. Zkontroluj integraci Bluetooth v Home Assistantu."
-    },
-    "abort": {
-      "already_configured": "Toto zařízení už je nastavené.",
-      "no_devices_found": "Nebyla nalezena žádná zařízení VCX-Knob.",
-      "scan_failed": "Vyhledávání Bluetooth selhalo.",
-      "pairing_failed": "Párování s {device_address} selhalo: {error_message}"
-    }
-  },
-  "entity": {
-    "sensor": {
-      "device_address": {
-        "name": "Bluetooth adresa"
-      },
-      "rssi": {
-        "name": "Síla signálu"
-      },
-      "air_percentage": {
-        "name": "Výkon sušení"
-      },
-      "water_percentage": {
-        "name": "Množství vody"
-      },
-      "radar_level": {
-        "name": "Úroveň radaru"
-      },
-      "cover_close_time": {
-        "name": "Čas zavření víka"
-      },
-      "cover_flip_intensity": {
-        "name": "Síla otevření víka"
-      },
-      "ring_flip_intensity": {
-        "name": "Síla zvednutí sedátka"
-      },
-      "cover_close_intensity": {
-        "name": "Síla zavření víka"
-      },
-      "ring_close_intensity": {
-        "name": "Síla sklopení sedátka"
-      },
-      "bubble_level": {
-        "name": "Úroveň bublinek"
-      },
-      "big_flush_water": {
-        "name": "Doba velkého spláchnutí"
-      },
-      "small_flush_water": {
-        "name": "Doba malého spláchnutí"
-      },
-      "small_flush_up": {
-        "name": "Horní fáze malého spláchnutí"
-      },
-      "foot_sensor_distance": {
-        "name": "Vzdálenost nožního senzoru"
-      },
-      "sterilization_time": {
-        "name": "Doba sterilizace"
-      },
-      "water_pressure": {
-        "name": "Tlak vody"
-      },
-      "ambient_light_brightness": {
-        "name": "Jas ambientního světla"
-      }
-    },
-    "switch": {
-      "radar": {
-        "name": "Radar"
-      },
-      "voice": {
-        "name": "Hlasové ovládání"
-      },
-      "sensor": {
-        "name": "Senzory"
-      },
-      "auto_mode": {
-        "name": "Automatický režim"
-      },
-      "night_light": {
-        "name": "Noční světlo"
-      },
-      "foot_sensor": {
-        "name": "Nožní senzor"
-      },
-      "sterilization": {
-        "name": "Sterilizace"
-      }
-    },
-    "button": {
-      "big_flush": {
-        "name": "Velké spláchnutí"
-      },
-      "small_flush": {
-        "name": "Malé spláchnutí"
-      },
-      "feminine_wash": {
-        "name": "Dámské mytí"
-      },
-      "rear_wash": {
-        "name": "Zadní mytí"
-      },
-      "massage": {
-        "name": "Masáž"
-      },
-      "bubble": {
-        "name": "Bublinky"
-      },
-      "stop": {
-        "name": "Zastavit"
-      },
-      "dry": {
-        "name": "Sušení"
-      },
-      "open_lid": {
-        "name": "Otevřít víko"
-      },
-      "open_seat": {
-        "name": "Zvednout sedátko"
-      },
-      "close": {
-        "name": "Zavřít"
-      },
-      "runbi": {
-        "name": "Předvlhčení mísy"
-      },
-      "self_clean": {
-        "name": "Samočištění"
-      },
-      "factory_reset": {
-        "name": "Obnovit tovární nastavení"
-      }
-    },
-    "select": {
-      "water_temperature": {
-        "name": "Teplota vody",
-        "state": {
-          "off": "Vypnuto",
-          "34": "34 °C",
-          "37": "37 °C",
-          "40": "40 °C"
-        }
-      },
-      "seat_temperature": {
-        "name": "Teplota sedátka",
-        "state": {
-          "off": "Vypnuto",
-          "34": "34 °C",
-          "37": "37 °C",
-          "40": "40 °C"
-        }
-      },
-      "wind_temperature": {
-        "name": "Teplota sušení",
-        "state": {
-          "off": "Vypnuto",
-          "40": "40 °C",
-          "45": "45 °C",
-          "50": "50 °C"
-        }
-      },
-      "water_level": {
-        "name": "Průtok vody",
-        "state": {
-          "off": "Vypnuto",
-          "low": "Nízký",
-          "medium": "Střední",
-          "high": "Vysoký"
-        }
-      },
-      "air_level": {
-        "name": "Výkon sušení",
-        "state": {
-          "off": "Vypnuto",
-          "low": "Nízký",
-          "medium": "Střední",
-          "high": "Vysoký"
-        }
-      },
-      "light_brightness": {
-        "name": "Jas světla",
-        "state": {
-          "off": "Vypnuto",
-          "low": "Nízký",
-          "medium": "Střední",
-          "high": "Vysoký"
-        }
-      },
-      "radar_sensitivity": {
-        "name": "Citlivost radaru",
-        "state": {
-          "low": "Nízká",
-          "medium": "Střední",
-          "high": "Vysoká"
-        }
-      }
-    },
-    "binary_sensor": {
-      "connection": {
-        "name": "Bluetooth připojeno"
-      },
-      "paired": {
-        "name": "Bluetooth spárováno"
-      }
-    }
-  },
-  "services": {
-    "pair_bluetooth_device": {
-      "name": "Spárovat Bluetooth zařízení",
-      "description": "Spáruje zařízení VCX-Knob a nastaví mu důvěryhodnost. Pouze pro administrátory.",
-      "fields": {
-        "device_address": {
-          "name": "MAC adresa zařízení",
-          "description": "Bluetooth MAC adresa, např. 88:36:A2:D8:80:AC."
-        },
-        "timeout": {
-          "name": "Časový limit",
-          "description": "Časový limit párování v sekundách."
-        }
-      }
-    },
-    "scan_bluetooth_device": {
-      "name": "Vyhledat Bluetooth zařízení",
-      "description": "Vyhledá blízká připojitelná Bluetooth zařízení odpovídající filtru. Pouze pro administrátory.",
-      "fields": {
-        "timeout": {
-          "name": "Doba vyhledávání",
-          "description": "Délka vyhledávání v sekundách."
-        },
-        "device_filter": {
-          "name": "Filtr názvu zařízení",
-          "description": "Text pro filtrování názvů Bluetooth zařízení bez rozlišení velikosti písmen."
-        }
-      }
-    },
-    "get_bluetooth_device_info": {
-      "name": "Zjistit informace o Bluetooth zařízení",
-      "description": "Zapíše do logu stav spárování, důvěryhodnosti a připojení. Pouze pro administrátory.",
-      "fields": {
-        "device_address": {
-          "name": "MAC adresa zařízení",
-          "description": "Bluetooth MAC adresa zařízení."
-        }
-      }
-    }
-  }
+    "config":  {
+                   "step":  {
+                                "user":  {
+                                             "title":  "Nastavení VCX-Knob Smart Toilet",
+                                             "description":  "Vyhledej blízká zařízení VCX-Knob přes Bluetooth.",
+                                             "data":  {
+
+                                                      }
+                                         },
+                                "scan":  {
+                                             "title":  "Vyhledávání zařízení",
+                                             "description":  "Vyhledávají se blízká zařízení {device_name}. Nech zařízení zapnuté a v dosahu Bluetooth."
+                                         },
+                                "select_device":  {
+                                                      "title":  "Výběr zařízení",
+                                                      "description":  "Vyber zařízení VCX-Knob, které chceš přidat.",
+                                                      "data":  {
+                                                                   "device_address":  "Nalezená zařízení"
+                                                               }
+                                                  },
+                                "pair":  {
+                                             "title":  "Spárování zařízení",
+                                             "description":  "U zařízení, která vyžadují Bluetooth párování, je spárování nutné pro zápis příkazů. Automatické párování používá lokální nástroj `bluetoothctl`. Pomocné Bluetooth akce jsou v této upravené verzi dostupné pouze administrátorům.\n\n**Zařízení:** {device_name}\n**Adresa:** {device_address}\n**Signál:** {rssi} dBm\n\nOdesláním se integrace pokusí zařízení spárovat. Pokud standardní párování zařízení nepodporuje, nastavení může pokračovat a párování lze provést později ručně."
+                                         },
+                                "confirm":  {
+                                                "title":  "Potvrzení zařízení",
+                                                "description":  "Nalezeno **{device_name}** na adrese **{device_address}**, síla signálu **{rssi} dBm**.",
+                                                "data":  {
+                                                             "device_name":  "Název zařízení",
+                                                             "auto_connect":  "Automaticky se připojovat k zařízení"
+                                                         }
+                                            }
+                            },
+                   "error":  {
+                                 "cannot_connect":  "K zařízení se nepodařilo připojit. Zkontroluj napájení, dosah a párování.",
+                                 "no_devices_found":  "Nebyla nalezena žádná zařízení VCX-Knob.",
+                                 "scan_failed":  "Vyhledávání Bluetooth selhalo. Zkontroluj integraci Bluetooth v Home Assistantu."
+                             },
+                   "abort":  {
+                                 "already_configured":  "Toto zařízení už je nastavené.",
+                                 "no_devices_found":  "Nebyla nalezena žádná zařízení VCX-Knob.",
+                                 "scan_failed":  "Vyhledávání Bluetooth selhalo.",
+                                 "pairing_failed":  "Párování s {device_address} selhalo: {error_message}"
+                             }
+               },
+    "entity":  {
+                   "sensor":  {
+                                  "device_address":  {
+                                                         "name":  "Bluetooth adresa"
+                                                     },
+                                  "rssi":  {
+                                               "name":  "Síla signálu"
+                                           },
+                                  "air_percentage":  {
+                                                         "name":  "Výkon sušení"
+                                                     },
+                                  "water_percentage":  {
+                                                           "name":  "Množství vody"
+                                                       },
+                                  "radar_level":  {
+                                                      "name":  "Úroveň radaru"
+                                                  },
+                                  "cover_close_time":  {
+                                                           "name":  "Čas zavření víka"
+                                                       },
+                                  "cover_flip_intensity":  {
+                                                               "name":  "Síla otevření víka"
+                                                           },
+                                  "ring_flip_intensity":  {
+                                                              "name":  "Síla zvednutí sedátka"
+                                                          },
+                                  "cover_close_intensity":  {
+                                                                "name":  "Síla zavření víka"
+                                                            },
+                                  "ring_close_intensity":  {
+                                                               "name":  "Síla sklopení sedátka"
+                                                           },
+                                  "bubble_level":  {
+                                                       "name":  "Úroveň bublinek"
+                                                   },
+                                  "big_flush_water":  {
+                                                          "name":  "Doba velkého spláchnutí"
+                                                      },
+                                  "small_flush_water":  {
+                                                            "name":  "Doba malého spláchnutí"
+                                                        },
+                                  "small_flush_up":  {
+                                                         "name":  "Horní fáze malého spláchnutí"
+                                                     },
+                                  "foot_sensor_distance":  {
+                                                               "name":  "Vzdálenost nožního senzoru"
+                                                           },
+                                  "sterilization_time":  {
+                                                             "name":  "Doba sterilizace"
+                                                         },
+                                  "water_pressure":  {
+                                                         "name":  "Tlak vody"
+                                                     },
+                                  "ambient_light_brightness":  {
+                                                                   "name":  "Jas ambientního světla"
+                                                               }
+                              },
+                   "switch":  {
+                                  "radar":  {
+                                                "name":  "Radar"
+                                            },
+                                  "voice":  {
+                                                "name":  "Hlasové ovládání"
+                                            },
+                                  "sensor":  {
+                                                 "name":  "Senzory"
+                                             },
+                                  "auto_mode":  {
+                                                    "name":  "Automatický režim"
+                                                },
+                                  "night_light":  {
+                                                      "name":  "Noční světlo"
+                                                  },
+                                  "foot_sensor":  {
+                                                      "name":  "Nožní senzor"
+                                                  },
+                                  "sterilization":  {
+                                                        "name":  "Sterilizace"
+                                                    }
+                              },
+                   "button":  {
+                                  "small_flush":  {
+                                                      "name":  "Malé spláchnutí"
+                                                  },
+                                  "feminine_wash":  {
+                                                        "name":  "Dámské mytí"
+                                                    },
+                                  "rear_wash":  {
+                                                    "name":  "Zadní mytí"
+                                                },
+                                  "massage":  {
+                                                  "name":  "Masáž"
+                                              },
+                                  "stop":  {
+                                               "name":  "Zastavit"
+                                           },
+                                  "dry":  {
+                                              "name":  "Sušení"
+                                          },
+                                  "close":  {
+                                                "name":  "Zavřít"
+                                            },
+                                  "runbi":  {
+                                                "name":  "Předvlhčení mísy"
+                                            },
+                                  "self_clean":  {
+                                                     "name":  "Samočištění"
+                                                 },
+                                  "factory_reset":  {
+                                                        "name":  "Obnovit tovární nastavení"
+                                                    },
+                                  "eco":  {
+                                              "name":  "ECO"
+                                          },
+                                  "open_seat":  {
+                                                    "name":  "Překlopit sedátko"
+                                                },
+                                  "child_wash":  {
+                                                     "name":  "Dětské mytí"
+                                                 },
+                                  "open_lid":  {
+                                                   "name":  "Překlopit víko"
+                                               },
+                                  "auto_mode":  {
+                                                    "name":  "Automatický režim"
+                                                },
+                                  "big_flush":  {
+                                                    "name":  "Spláchnout"
+                                                },
+                                  "power":  {
+                                                "name":  "Napájení"
+                                            },
+                                  "bubble":  {
+                                                 "name":  "Pěna"
+                                             },
+                                  "light":  {
+                                                "name":  "Světlo"
+                                            }
+                              },
+                   "select":  {
+                                  "water_temperature":  {
+                                                            "name":  "Teplota vody",
+                                                            "state":  {
+                                                                          "off":  "Vypnuto",
+                                                                          "34":  "34 °C",
+                                                                          "37":  "37 °C",
+                                                                          "40":  "40 °C"
+                                                                      }
+                                                        },
+                                  "seat_temperature":  {
+                                                           "name":  "Teplota sedátka",
+                                                           "state":  {
+                                                                         "off":  "Vypnuto",
+                                                                         "34":  "34 °C",
+                                                                         "37":  "37 °C",
+                                                                         "40":  "40 °C"
+                                                                     }
+                                                       },
+                                  "wind_temperature":  {
+                                                           "name":  "Teplota sušení",
+                                                           "state":  {
+                                                                         "off":  "Vypnuto",
+                                                                         "45":  "45 °C",
+                                                                         "50":  "50 °C",
+                                                                         "55":  "55 °C"
+                                                                     }
+                                                       },
+                                  "water_level":  {
+                                                      "name":  "Průtok vody",
+                                                      "state":  {
+                                                                    "off":  "Vypnuto",
+                                                                    "low":  "Nízký",
+                                                                    "medium":  "Střední",
+                                                                    "high":  "Vysoký"
+                                                                }
+                                                  },
+                                  "air_level":  {
+                                                    "name":  "Výkon sušení",
+                                                    "state":  {
+                                                                  "off":  "Vypnuto",
+                                                                  "low":  "Nízký",
+                                                                  "medium":  "Střední",
+                                                                  "high":  "Vysoký"
+                                                              }
+                                                },
+                                  "light_brightness":  {
+                                                           "name":  "Jas světla",
+                                                           "state":  {
+                                                                         "off":  "Vypnuto",
+                                                                         "low":  "Nízký",
+                                                                         "medium":  "Střední",
+                                                                         "high":  "Vysoký"
+                                                                     }
+                                                       },
+                                  "radar_sensitivity":  {
+                                                            "name":  "Citlivost radaru",
+                                                            "state":  {
+                                                                          "low":  "Nízká",
+                                                                          "medium":  "Střední",
+                                                                          "high":  "Vysoká"
+                                                                      }
+                                                        },
+                                  "water_pressure_level":  {
+                                                               "name":  "Tlak vody",
+                                                               "state":  {
+                                                                             "0":  "Úroveň 0",
+                                                                             "1":  "Úroveň 1",
+                                                                             "2":  "Úroveň 2",
+                                                                             "3":  "Úroveň 3"
+                                                                         }
+                                                           },
+                                  "nozzle_position":  {
+                                                          "name":  "Poloha trysky",
+                                                          "state":  {
+                                                                        "0":  "Úroveň 0",
+                                                                        "1":  "Úroveň 1",
+                                                                        "2":  "Úroveň 2",
+                                                                        "3":  "Úroveň 3"
+                                                                    }
+                                                      }
+                              },
+                   "binary_sensor":  {
+                                         "connection":  {
+                                                            "name":  "Bluetooth připojeno"
+                                                        },
+                                         "paired":  {
+                                                        "name":  "Bluetooth spárováno"
+                                                    }
+                                     },
+                   "light":  {
+                                 "ambient_light":  {
+                                                       "name":  "Ambientní RGB světlo"
+                                                   }
+                             }
+               },
+    "services":  {
+                     "pair_bluetooth_device":  {
+                                                   "name":  "Spárovat Bluetooth zařízení",
+                                                   "description":  "Spáruje zařízení VCX-Knob a nastaví mu důvěryhodnost. Pouze pro administrátory.",
+                                                   "fields":  {
+                                                                  "device_address":  {
+                                                                                         "name":  "MAC adresa zařízení",
+                                                                                         "description":  "Bluetooth MAC adresa, např. 88:36:A2:D8:80:AC."
+                                                                                     },
+                                                                  "timeout":  {
+                                                                                  "name":  "Časový limit",
+                                                                                  "description":  "Časový limit párování v sekundách."
+                                                                              }
+                                                              }
+                                               },
+                     "scan_bluetooth_device":  {
+                                                   "name":  "Vyhledat Bluetooth zařízení",
+                                                   "description":  "Vyhledá blízká připojitelná Bluetooth zařízení odpovídající filtru. Pouze pro administrátory.",
+                                                   "fields":  {
+                                                                  "timeout":  {
+                                                                                  "name":  "Doba vyhledávání",
+                                                                                  "description":  "Délka vyhledávání v sekundách."
+                                                                              },
+                                                                  "device_filter":  {
+                                                                                        "name":  "Filtr názvu zařízení",
+                                                                                        "description":  "Text pro filtrování názvů Bluetooth zařízení bez rozlišení velikosti písmen."
+                                                                                    }
+                                                              }
+                                               },
+                     "get_bluetooth_device_info":  {
+                                                       "name":  "Zjistit informace o Bluetooth zařízení",
+                                                       "description":  "Zapíše do logu stav spárování, důvěryhodnosti a připojení. Pouze pro administrátory.",
+                                                       "fields":  {
+                                                                      "device_address":  {
+                                                                                             "name":  "MAC adresa zařízení",
+                                                                                             "description":  "Bluetooth MAC adresa zařízení."
+                                                                                         }
+                                                                  }
+                                                   }
+                 }
 }
