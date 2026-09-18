@@ -1,13 +1,28 @@
-﻿# Changelog
+# Changelog / PĹ™ehled zmÄ›n
 
-## 1.0.4 - HACS installation hotfix
+## 1.0.5 - HACS a UTF-8 hotfix
 
-- Fixed HACS `zip_release` archive layout. Integration files are now at the ZIP root.
-- Changed manifest version to valid SemVer `1.0.4`.
-- Removed redundant `bleak` pip requirement.
-- Added release ZIP layout verification.
+### CZ
+- Opraveno kĂłdovĂˇnĂ­ `CHANGELOG.md` do ÄŤistĂ©ho UTF-8 bez BOM.
+- Opraven `manifest.json` do ÄŤistĂ©ho UTF-8 bez BOM.
+- Opraven release workflow tak, aby vytvĂˇĹ™el HACS ZIP se soubory integrace pĹ™Ă­mo v koĹ™eni archivu.
+- PĹ™idĂˇna kontrola struktury release ZIPu pĹ™ed vytvoĹ™enĂ­m GitHub release.
+- Verze integrace zvĂ˝Ĺˇena na `1.0.5`.
 
-/ PĹ™ehled zmÄ›n
+### EN
+- Fixed `CHANGELOG.md` encoding to plain UTF-8 without BOM.
+- Fixed `manifest.json` to plain UTF-8 without BOM.
+- Fixed the release workflow so the HACS ZIP contains integration files at the archive root.
+- Added release archive layout validation before creating the GitHub release.
+- Bumped integration version to `1.0.5`.
+
+## 1.0.4 - neĂşspÄ›ĹˇnĂ˝ release / failed release
+
+Tag `v1.0.4` byl vytvoĹ™en, ale GitHub Actions release selhal kvĹŻli UTF-8 BOM v `manifest.json`.
+HACS proto tuto verzi nikdy nenabĂ­zel jako release.
+
+The `v1.0.4` tag was created, but the GitHub Actions release failed because `manifest.json` contained a UTF-8 BOM.
+As a result, HACS never saw this version as an available release.
 
 ## 1.0.3-mod.1
 
@@ -30,4 +45,3 @@
 - Czech and English user interface.
 - Raw command service is not exposed.
 - Hardened GitHub release workflow.
-
