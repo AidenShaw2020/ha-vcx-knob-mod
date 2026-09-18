@@ -1,5 +1,22 @@
 # Changelog / Přehled změn
 
+## 1.0.8 - BLE proxy a stavová data / BLE proxy and status data
+
+### CZ
+- Připojení nyní používá Home Assistant Bluetooth manager a `bleak_retry_connector.establish_connection()`, takže správně podporuje ESPHome Bluetooth Proxy.
+- Opravena chybná kontrola GATT služby přes `str(services)`.
+- Integrace validuje skutečné služby a charakteristiky FFA0/FFA1/FFA2 přes Bleak API.
+- Při nesouladu GATT profilu vypíše do logu všechny nalezené služby, charakteristiky a jejich properties.
+- BLE notifikace se nyní skládají jako stream; neúplný 8bajtový paket se již nezahodí mezi dvěma notifikacemi.
+- Po setupu se okamžitě provede první status refresh místo čekání na další periodický interval.
+
+### EN
+- Connections now use Home Assistant's Bluetooth manager with `bleak_retry_connector.establish_connection()` for proper ESPHome Bluetooth Proxy support.
+- Fixed the invalid GATT service check based on `str(services)`.
+- FFA0/FFA1/FFA2 are validated through the Bleak GATT API.
+- On GATT mismatch, all discovered services, characteristics and properties are logged.
+- BLE notifications are now reassembled as a byte stream, preserving fragmented 8-byte packets across notifications.
+- The integration performs an immediate status refresh after setup.
 ## 1.0.7 - runtime-safe oprava config flow / runtime-safe config-flow fix
 
 ### CZ

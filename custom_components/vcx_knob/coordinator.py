@@ -144,167 +144,220 @@ class VCXKnobNotFoundError(VCXKnobConnectionError):
 # ============================================================================
 
 class VCXKnobBLEClient:
-    """管理 VCX-Knob 设备的 BLE 连接和通信
-
-    此类处理:
-    - 使用 bleak 进行低级 BLE 连接
-    - 命令传输
-    - 状态包接收和缓冲
-    - 连接状态管理
-    """
+    """Manage the VCX-Knob BLE connection through Home Assistant Bluetooth."""
 
     def __init__(
         self,
+        hass: HomeAssistant,
         address: str,
         name: str,
         notification_callback: Callable[[bytes], None],
     ) -> None:
-        """初始化 BLE 客户端
-
-        Args:
-            address: BLE 设备地址（Linux 上为 MAC，macOS 上为 UUID）
-            name: 设备名称（用于日志记录）
-            notification_callback: 接收通知的回调
-        """
+        """Initialize the BLE client."""
+        self._hass = hass
         self._address = address
         self._name = name
-
-        def _disconnected_callback(client: BleakClient) -> None:
-            _LOGGER.warning("设备 %s 已断开连接", address)
-            self._is_connected = False
-
-        self._client = BleakClient(
-            address,
-            disconnected_callback=_disconnected_callback,
-        )
         self._notification_callback = notification_callback
+        self._client: BleakClient | None = None
         self._status_buffer: list[str] = []
+        self._rx_buffer = bytearray()
         self._is_connected = False
         self._disconnect_time: float | None = None
         self._lock = asyncio.Lock()
 
+    def _disconnected_callback(self, _client: BleakClient) -> None:
+        """Handle a BLE disconnect."""
+        _LOGGER.warning("Device %s disconnected", self._address)
+        self._is_connected = False
+
     @property
     def address(self) -> str:
-        """获取设备地址"""
+        """Return the BLE address."""
         return self._address
 
     @property
     def name(self) -> str:
-        """获取设备名称"""
+        """Return the device name."""
         return self._name
 
     @property
     def is_connected(self) -> bool:
-        """检查设备是否已连接"""
-        return self._is_connected and self._client.is_connected
+        """Return whether the BLE client is connected."""
+        return (
+            self._is_connected
+            and self._client is not None
+            and self._client.is_connected
+        )
 
     @property
     def rssi(self) -> int | None:
-        """获取当前 RSSI 值"""
-        if not self.is_connected:
+        """Return the latest RSSI seen by Home Assistant."""
+        try:
+            service_info = async_last_service_info(
+                self._hass,
+                self._address,
+                True,
+            )
+            return service_info.rssi if service_info else None
+        except Exception:
             return None
 
-        # 尝试从蓝牙适配器获取 RSSI
-        try:
-            service_info = bluetooth.async_get_service_info_from_name(
-                self._address, self._name
-            )
-            if service_info:
-                return service_info.rssi
-        except Exception:
-            pass
+    def _log_gatt_profile(self) -> None:
+        """Log all discovered GATT services and characteristics."""
+        if self._client is None:
+            return
 
-        return None
+        services = self._client.services
+        _LOGGER.warning(
+            "GATT profile for %s (%s):",
+            self._name,
+            self._address,
+        )
+        for service in services.services.values():
+            _LOGGER.warning(
+                "GATT service uuid=%s handle=%s",
+                service.uuid,
+                service.handle,
+            )
+            for char in service.characteristics:
+                _LOGGER.warning(
+                    "  characteristic uuid=%s handle=%s properties=%s",
+                    char.uuid,
+                    char.handle,
+                    ",".join(char.properties),
+                )
 
     async def connect(self) -> None:
-        """连接到 BLE 设备
-
-        Raises:
-            VCXKnobConnectionError: 如果连接失败
-        """
+        """Connect using Home Assistant's BLE device and bleak-retry-connector."""
         async with self._lock:
             if self.is_connected:
-                _LOGGER.debug("已连接到 %s", self._address)
+                _LOGGER.debug("Already connected to %s", self._address)
                 return
 
-            # 检查冷却时间
             if self._disconnect_time:
                 cooldown_remaining = DISCONNECT_COOLDOWN - (
                     asyncio.get_event_loop().time() - self._disconnect_time
                 )
                 if cooldown_remaining > 0:
-                    _LOGGER.debug(
-                        "在断开冷却期内，等待 %.1f 秒",
-                        cooldown_remaining,
-                    )
                     await asyncio.sleep(cooldown_remaining)
 
-            _LOGGER.info("正在连接到 %s (%s)", self._name, self._address)
+            ble_device = async_ble_device_from_address(
+                self._hass,
+                self._address,
+                connectable=True,
+            )
+            if ble_device is None:
+                raise VCXKnobNotFoundError(self._address)
+
+            _LOGGER.info(
+                "Connecting to %s (%s) through Home Assistant Bluetooth",
+                self._name,
+                self._address,
+            )
 
             try:
                 async with asyncio.timeout(CONNECTION_TIMEOUT):
-                    await self._client.connect()
-
-                # 验证服务 UUID 存在
-                services = self._client.services
-                if BLE_SERVICE_UUID not in str(services):
-                    _LOGGER.warning(
-                        "在设备服务中未找到服务 UUID %s: %s",
-                        BLE_SERVICE_UUID,
-                        services,
+                    self._client = await establish_connection(
+                        BleakClient,
+                        ble_device,
+                        self._name or self._address,
+                        disconnected_callback=self._disconnected_callback,
                     )
 
-                # 订阅通知
+                services = self._client.services
+                service = services.get_service(BLE_SERVICE_UUID)
+                write_char = services.get_characteristic(
+                    BLE_WRITE_CHARACTERISTIC_UUID
+                )
+                notify_char = services.get_characteristic(
+                    BLE_NOTIFY_CHARACTERISTIC_UUID
+                )
+
+                if service is None or write_char is None or notify_char is None:
+                    self._log_gatt_profile()
+                    missing: list[str] = []
+                    if service is None:
+                        missing.append(f"service {BLE_SERVICE_UUID}")
+                    if write_char is None:
+                        missing.append(f"write characteristic {BLE_WRITE_CHARACTERISTIC_UUID}")
+                    if notify_char is None:
+                        missing.append(f"notify characteristic {BLE_NOTIFY_CHARACTERISTIC_UUID}")
+                    try:
+                        await self._client.disconnect()
+                    finally:
+                        self._client = None
+                    raise VCXKnobConnectionError(
+                        "Expected VCX-Knob GATT profile is missing: "
+                        + ", ".join(missing),
+                        retryable=False,
+                    )
+
+                _LOGGER.info(
+                    "VCX-Knob GATT profile verified: service=%s write=%s notify=%s",
+                    service.uuid,
+                    write_char.uuid,
+                    notify_char.uuid,
+                )
+                _LOGGER.debug(
+                    "Write properties=%s; notify properties=%s",
+                    write_char.properties,
+                    notify_char.properties,
+                )
+
                 await self._client.start_notify(
-                    BLE_NOTIFY_CHARACTERISTIC_UUID,
+                    notify_char,
                     self._notification_handler,
                 )
 
                 self._is_connected = True
                 self._disconnect_time = None
                 self._status_buffer.clear()
-
-                _LOGGER.info("已连接到 %s (%s)", self._name, self._address)
+                self._rx_buffer.clear()
+                _LOGGER.info("Connected to %s (%s)", self._name, self._address)
 
             except asyncio.TimeoutError as err:
                 raise VCXKnobConnectionError(
-                    f"连接到 {self._address} 超时",
+                    f"Connection to {self._address} timed out",
                     retryable=True,
                 ) from err
             except BleakDBusError as err:
                 raise VCXKnobConnectionError(
-                    f"连接到 {self._address} 时发生 DBus 错误: {err}",
+                    f"DBus error while connecting to {self._address}: {err}",
                     retryable=True,
                 ) from err
+            except VCXKnobConnectionError:
+                raise
             except BleakError as err:
                 raise VCXKnobConnectionError(
-                    f"无法连接到 {self._address}: {err}",
-                    retryable=False,
+                    f"Unable to connect to {self._address}: {err}",
+                    retryable=True,
                 ) from err
 
     async def disconnect(self) -> None:
-        """从 BLE 设备断开连接"""
+        """Disconnect from the BLE device."""
         async with self._lock:
-            if not self.is_connected:
+            client = self._client
+            if client is None:
+                self._is_connected = False
                 return
 
-            _LOGGER.info("正在从 %s (%s) 断开连接", self._name, self._address)
-
             try:
-                # 取消订阅通知
-                try:
-                    await self._client.stop_notify(BLE_NOTIFY_CHARACTERISTIC_UUID)
-                except Exception:
-                    pass
-
-                await self._client.disconnect()
+                if client.is_connected:
+                    try:
+                        notify_char = client.services.get_characteristic(
+                            BLE_NOTIFY_CHARACTERISTIC_UUID
+                        )
+                        if notify_char is not None:
+                            await client.stop_notify(notify_char)
+                    except Exception:
+                        pass
+                    await client.disconnect()
             except Exception as err:
-                _LOGGER.warning("断开连接期间出错: %s", err)
+                _LOGGER.warning("Error while disconnecting: %s", err)
             finally:
+                self._client = None
                 self._is_connected = False
                 self._disconnect_time = asyncio.get_event_loop().time()
-
-                _LOGGER.info("已从 %s 断开连接", self._address)
 
     async def send_command(
         self,
@@ -313,94 +366,98 @@ class VCXKnobBLEClient:
         d2: int = 0,
         d3: int = 0,
     ) -> None:
-        """向设备发送命令
-
-        Args:
-            cmd: 命令码（例如 "07" 表示大冲水）
-            d1: 第一个数据字节
-            d2: 第二个数据字节
-            d3: 第三个数据字节
-
-        Raises:
-            VCXKnobConnectionError: 如果未连接或发送失败
-        """
-        if not self.is_connected:
+        """Send one VCX-Knob command."""
+        if not self.is_connected or self._client is None:
             raise VCXKnobConnectionError(
-                "未连接到设备",
+                "Not connected to device",
                 retryable=True,
             )
 
         command = build_command(cmd, d1, d2, d3)
-
-        _LOGGER.debug(
-            "发送命令: %s",
-            command.hex().upper(),
-        )
+        _LOGGER.debug("Sending command: %s", command.hex().upper())
 
         try:
+            write_char = self._client.services.get_characteristic(
+                BLE_WRITE_CHARACTERISTIC_UUID
+            )
+            if write_char is None:
+                self._log_gatt_profile()
+                raise VCXKnobConnectionError(
+                    f"Write characteristic {BLE_WRITE_CHARACTERISTIC_UUID} not found",
+                    retryable=False,
+                )
+
             async with asyncio.timeout(10):
-                # VCX-Knob 设备使用 write-without-response
-                # 参考 Node.js 实现，特征值属性为 'write-without-response'
                 await self._client.write_gatt_char(
-                    BLE_WRITE_CHARACTERISTIC_UUID,
+                    write_char,
                     command,
                     response=False,
                 )
         except asyncio.TimeoutError as err:
             raise VCXKnobConnectionError(
-                "命令发送超时",
+                "Command send timed out",
                 retryable=True,
             ) from err
+        except VCXKnobConnectionError:
+            raise
         except BleakError as err:
             raise VCXKnobConnectionError(
-                f"发送命令失败: {err}",
-                retryable=False,
+                f"Command send failed: {err}",
+                retryable=True,
             ) from err
 
-    def _notification_handler(self, sender: int, data: bytearray) -> None:
-        """处理来自设备的通知
+    def _notification_handler(self, _sender: object, data: bytearray) -> None:
+        """Reassemble fragmented BLE notifications into 8-byte status packets."""
+        raw = bytes(data)
+        _LOGGER.debug(
+            "BLE notification (%d bytes): %s",
+            len(raw),
+            raw.hex().upper(),
+        )
 
-        BLE 通知可能包含多个连续的 8 字节状态包，需要按 PACKET_TOTAL_SIZE 切分。
+        self._rx_buffer.extend(raw)
 
-        Args:
-            sender: 发送通知的特征句柄
-            data: 接收的数据字节
-        """
-        hex_str = data.hex().upper()
-        _LOGGER.debug("收到通知(%d字节): %s", len(data), hex_str)
+        # Status packets begin with AA 08 88 and are exactly 8 bytes long.
+        # Keep incomplete tails for the next BLE notification instead of dropping them.
+        header = b"\xAA\x08\x88"
+        while True:
+            start = self._rx_buffer.find(header)
+            if start < 0:
+                # Preserve up to two trailing bytes in case they are the beginning
+                # of the next AA 08 88 header.
+                if len(self._rx_buffer) > 2:
+                    del self._rx_buffer[:-2]
+                break
 
-        # 按 8 字节切分，逐个加入缓冲区
-        PACKET_SIZE = 8
-        for i in range(0, len(data), PACKET_SIZE):
-            chunk = data[i:i + PACKET_SIZE]
-            if len(chunk) == PACKET_SIZE:
-                self._status_buffer.append(chunk.hex().upper())
-            else:
+            if start > 0:
                 _LOGGER.debug(
-                    "忽略不完整的尾部数据(%d字节): %s",
-                    len(chunk),
-                    chunk.hex().upper(),
+                    "Discarding %d byte(s) before status packet header",
+                    start,
                 )
+                del self._rx_buffer[:start]
 
-        # 防止缓冲区增长过大
+            if len(self._rx_buffer) < 8:
+                break
+
+            packet = bytes(self._rx_buffer[:8])
+            del self._rx_buffer[:8]
+            packet_hex = packet.hex().upper()
+            self._status_buffer.append(packet_hex)
+            _LOGGER.debug("Reassembled status packet: %s", packet_hex)
+
         if len(self._status_buffer) > 100:
             self._status_buffer = self._status_buffer[-100:]
 
-        # 通知回调（保留原始数据兼容性）
-        self._notification_callback(data)
+        self._notification_callback(raw)
 
     def get_status_buffer(self) -> list[str]:
-        """获取当前状态缓冲区
-
-        Returns:
-            表示接收到的数据包的十六进制字符串列表
-        """
+        """Return complete status packets received so far."""
         return self._status_buffer.copy()
 
     def clear_status_buffer(self) -> None:
-        """清空状态缓冲区"""
+        """Clear parsed and partial status buffers before a new query."""
         self._status_buffer.clear()
-
+        self._rx_buffer.clear()
 
 # ============================================================================
 # 数据更新协调器
