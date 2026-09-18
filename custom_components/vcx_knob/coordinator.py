@@ -388,11 +388,33 @@ class VCXKnobBLEClient:
                     retryable=False,
                 )
 
+            properties = set(write_char.properties)
+            if "write" in properties:
+                use_response = True
+                write_mode = "write-with-response"
+            elif "write-without-response" in properties:
+                use_response = False
+                write_mode = "write-without-response"
+            else:
+                self._log_gatt_profile()
+                raise VCXKnobConnectionError(
+                    "Write characteristic supports neither 'write' nor "
+                    "'write-without-response'",
+                    retryable=False,
+                )
+
+            _LOGGER.debug(
+                "Using %s for %s; properties=%s",
+                write_mode,
+                BLE_WRITE_CHARACTERISTIC_UUID,
+                sorted(properties),
+            )
+
             async with asyncio.timeout(10):
                 await self._client.write_gatt_char(
                     write_char,
                     command,
-                    response=False,
+                    response=use_response,
                 )
         except asyncio.TimeoutError as err:
             raise VCXKnobConnectionError(

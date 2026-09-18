@@ -1,5 +1,20 @@
 # Changelog / Přehled změn
 
+## 1.0.11 - správný GATT write režim / correct GATT write mode
+
+### CZ
+- Opraven způsob zápisu na FFA1 podle skutečných properties charakteristiky.
+- Pokud FFA1 podporuje `write`, používá se BLE write-with-response (`response=True`).
+- Pokud podporuje pouze `write-without-response`, použije se `response=False`.
+- Integrace už nenutí write-without-response na zařízení, které ho neinzeruje.
+- Přidán DEBUG log zvoleného write režimu a properties charakteristiky.
+
+### EN
+- Fixed FFA1 writes to follow the characteristic's actual GATT properties.
+- If FFA1 supports `write`, BLE write-with-response (`response=True`) is used.
+- If it only supports `write-without-response`, `response=False` is used.
+- The integration no longer forces write-without-response on devices that do not advertise it.
+- Added DEBUG logging for the selected write mode and characteristic properties.
 ## 1.0.10 - úplná oprava BLE helperů / complete BLE helper fix
 
 ### CZ
