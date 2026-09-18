@@ -95,7 +95,7 @@ from .const import (
     DEFAULT_STATUS_POLL_INTERVAL,
     DOMAIN,
 )
-from .protocol import build_command, decode_status_packet, parse_status_packet
+from .protocol import build_ambient_command, build_command, decode_status_packet, parse_status_packet
 
 _LOGGER = logging.getLogger(__name__)
 

@@ -1,5 +1,16 @@
 # Changelog / Přehled změn
 
+## 1.0.14 - oprava release / release hotfix
+
+### CZ
+- Opraven chybějící import `build_ambient_command` v `coordinator.py`.
+- Release 1.0.13 byl zablokován Ruff kontrolou F821 ještě před vytvořením HACS ZIPu.
+- Funkční změny protokolu z 1.0.13 zůstávají beze změny.
+
+### EN
+- Fixed the missing `build_ambient_command` import in `coordinator.py`.
+- The 1.0.13 release was blocked by the Ruff F821 check before the HACS ZIP was created.
+- Protocol behavior introduced in 1.0.13 is otherwise unchanged.
 ## 1.0.13 - protokol podle DM Toilet Control 1.0.6 / app-verified protocol
 
 ### CZ
