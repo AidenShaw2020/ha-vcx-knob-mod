@@ -1,282 +1,322 @@
 {
-  "config": {
-    "step": {
-      "user": {
-        "title": "Set up VCX-Knob Smart Toilet",
-        "description": "Scan for nearby VCX-Knob devices over Bluetooth.",
-        "data": {}
-      },
-      "scan": {
-        "title": "Scanning for devices",
-        "description": "Scanning for nearby {device_name} devices. Keep the device powered on and within Bluetooth range."
-      },
-      "select_device": {
-        "title": "Select device",
-        "description": "Select the VCX-Knob device to add.",
-        "data": {
-          "device_address": "Discovered devices"
-        }
-      },
-      "pair": {
-        "title": "Pair device",
-        "description": "Pairing is required for write access on devices that enforce Bluetooth pairing. Automated pairing uses the local `bluetoothctl` tool. Bluetooth helper actions in this hardened fork are administrator-only.\n\n**Device:** {device_name}\n**Address:** {device_address}\n**Signal:** {rssi} dBm\n\nSubmit to attempt pairing. If the device does not support standard pairing, setup will continue and you can pair it manually later."
-      },
-      "confirm": {
-        "title": "Confirm device",
-        "description": "Found **{device_name}** at **{device_address}** with signal strength **{rssi} dBm**.",
-        "data": {
-          "device_name": "Device name",
-          "auto_connect": "Automatically connect to device"
-        }
-      }
-    },
-    "error": {
-      "cannot_connect": "Could not connect to the device. Check power, range and pairing.",
-      "no_devices_found": "No VCX-Knob devices were found.",
-      "scan_failed": "Bluetooth scan failed. Check the Home Assistant Bluetooth integration."
-    },
-    "abort": {
-      "already_configured": "This device is already configured.",
-      "no_devices_found": "No VCX-Knob devices were found.",
-      "scan_failed": "Bluetooth scan failed.",
-      "pairing_failed": "Pairing with {device_address} failed: {error_message}"
-    }
-  },
-  "entity": {
-    "sensor": {
-      "device_address": {
-        "name": "Bluetooth Address"
-      },
-      "rssi": {
-        "name": "Signal Strength"
-      },
-      "air_percentage": {
-        "name": "Dryer Output"
-      },
-      "water_percentage": {
-        "name": "Water Output"
-      },
-      "radar_level": {
-        "name": "Radar Level"
-      },
-      "cover_close_time": {
-        "name": "Lid Close Time"
-      },
-      "cover_flip_intensity": {
-        "name": "Lid Opening Intensity"
-      },
-      "ring_flip_intensity": {
-        "name": "Seat Opening Intensity"
-      },
-      "cover_close_intensity": {
-        "name": "Lid Closing Intensity"
-      },
-      "ring_close_intensity": {
-        "name": "Seat Closing Intensity"
-      },
-      "bubble_level": {
-        "name": "Bubble Level"
-      },
-      "big_flush_water": {
-        "name": "Big Flush Duration"
-      },
-      "small_flush_water": {
-        "name": "Small Flush Duration"
-      },
-      "small_flush_up": {
-        "name": "Small Flush Upper Phase"
-      },
-      "foot_sensor_distance": {
-        "name": "Foot Sensor Distance"
-      },
-      "sterilization_time": {
-        "name": "Sterilization Time"
-      },
-      "water_pressure": {
-        "name": "Water Pressure"
-      },
-      "ambient_light_brightness": {
-        "name": "Ambient Light Brightness"
-      }
-    },
-    "switch": {
-      "radar": {
-        "name": "Radar"
-      },
-      "voice": {
-        "name": "Voice Control"
-      },
-      "sensor": {
-        "name": "Sensors"
-      },
-      "auto_mode": {
-        "name": "Automatic Mode"
-      },
-      "night_light": {
-        "name": "Night Light"
-      },
-      "foot_sensor": {
-        "name": "Foot Sensor"
-      },
-      "sterilization": {
-        "name": "Sterilization"
-      }
-    },
-    "button": {
-      "big_flush": {
-        "name": "Big Flush"
-      },
-      "small_flush": {
-        "name": "Small Flush"
-      },
-      "feminine_wash": {
-        "name": "Feminine Wash"
-      },
-      "rear_wash": {
-        "name": "Rear Wash"
-      },
-      "massage": {
-        "name": "Massage"
-      },
-      "bubble": {
-        "name": "Bubble"
-      },
-      "stop": {
-        "name": "Stop"
-      },
-      "dry": {
-        "name": "Dry"
-      },
-      "open_lid": {
-        "name": "Open Lid"
-      },
-      "open_seat": {
-        "name": "Raise Seat"
-      },
-      "close": {
-        "name": "Close"
-      },
-      "runbi": {
-        "name": "Pre-wet Bowl"
-      },
-      "self_clean": {
-        "name": "Self Clean"
-      },
-      "factory_reset": {
-        "name": "Factory Reset"
-      }
-    },
-    "select": {
-      "water_temperature": {
-        "name": "Water Temperature",
-        "state": {
-          "off": "Off",
-          "34": "34 °C",
-          "37": "37 °C",
-          "40": "40 °C"
-        }
-      },
-      "seat_temperature": {
-        "name": "Seat Temperature",
-        "state": {
-          "off": "Off",
-          "34": "34 °C",
-          "37": "37 °C",
-          "40": "40 °C"
-        }
-      },
-      "wind_temperature": {
-        "name": "Dryer Temperature",
-        "state": {
-          "off": "Off",
-          "40": "40 °C",
-          "45": "45 °C",
-          "50": "50 °C"
-        }
-      },
-      "water_level": {
-        "name": "Water Flow",
-        "state": {
-          "off": "Off",
-          "low": "Low",
-          "medium": "Medium",
-          "high": "High"
-        }
-      },
-      "air_level": {
-        "name": "Dryer Level",
-        "state": {
-          "off": "Off",
-          "low": "Low",
-          "medium": "Medium",
-          "high": "High"
-        }
-      },
-      "light_brightness": {
-        "name": "Light Brightness",
-        "state": {
-          "off": "Off",
-          "low": "Low",
-          "medium": "Medium",
-          "high": "High"
-        }
-      },
-      "radar_sensitivity": {
-        "name": "Radar Sensitivity",
-        "state": {
-          "low": "Low",
-          "medium": "Medium",
-          "high": "High"
-        }
-      }
-    },
-    "binary_sensor": {
-      "connection": {
-        "name": "Bluetooth Connected"
-      },
-      "paired": {
-        "name": "Bluetooth Paired"
-      }
-    }
-  },
-  "services": {
-    "pair_bluetooth_device": {
-      "name": "Pair Bluetooth Device",
-      "description": "Pair and trust a VCX-Knob Bluetooth device. Administrator only.",
-      "fields": {
-        "device_address": {
-          "name": "Device MAC address",
-          "description": "Bluetooth MAC address, for example 88:36:A2:D8:80:AC."
-        },
-        "timeout": {
-          "name": "Timeout",
-          "description": "Pairing timeout in seconds."
-        }
-      }
-    },
-    "scan_bluetooth_device": {
-      "name": "Scan Bluetooth Devices",
-      "description": "Scan for nearby matching connectable Bluetooth devices. Administrator only.",
-      "fields": {
-        "timeout": {
-          "name": "Timeout",
-          "description": "Scan duration in seconds."
-        },
-        "device_filter": {
-          "name": "Device name filter",
-          "description": "Case-insensitive text used to filter advertised device names."
-        }
-      }
-    },
-    "get_bluetooth_device_info": {
-      "name": "Get Bluetooth Device Info",
-      "description": "Log pairing, trust and connection state for a Bluetooth device. Administrator only.",
-      "fields": {
-        "device_address": {
-          "name": "Device MAC address",
-          "description": "Bluetooth MAC address to query."
-        }
-      }
-    }
-  }
+    "config":  {
+                   "step":  {
+                                "user":  {
+                                             "title":  "Set up VCX-Knob Smart Toilet",
+                                             "description":  "Scan for nearby VCX-Knob devices over Bluetooth.",
+                                             "data":  {
+
+                                                      }
+                                         },
+                                "scan":  {
+                                             "title":  "Scanning for devices",
+                                             "description":  "Scanning for nearby {device_name} devices. Keep the device powered on and within Bluetooth range."
+                                         },
+                                "select_device":  {
+                                                      "title":  "Select device",
+                                                      "description":  "Select the VCX-Knob device to add.",
+                                                      "data":  {
+                                                                   "device_address":  "Discovered devices"
+                                                               }
+                                                  },
+                                "pair":  {
+                                             "title":  "Pair device",
+                                             "description":  "Pairing is required for write access on devices that enforce Bluetooth pairing. Automated pairing uses the local `bluetoothctl` tool. Bluetooth helper actions in this hardened fork are administrator-only.\n\n**Device:** {device_name}\n**Address:** {device_address}\n**Signal:** {rssi} dBm\n\nSubmit to attempt pairing. If the device does not support standard pairing, setup will continue and you can pair it manually later."
+                                         },
+                                "confirm":  {
+                                                "title":  "Confirm device",
+                                                "description":  "Found **{device_name}** at **{device_address}** with signal strength **{rssi} dBm**.",
+                                                "data":  {
+                                                             "device_name":  "Device name",
+                                                             "auto_connect":  "Automatically connect to device"
+                                                         }
+                                            }
+                            },
+                   "error":  {
+                                 "cannot_connect":  "Could not connect to the device. Check power, range and pairing.",
+                                 "no_devices_found":  "No VCX-Knob devices were found.",
+                                 "scan_failed":  "Bluetooth scan failed. Check the Home Assistant Bluetooth integration."
+                             },
+                   "abort":  {
+                                 "already_configured":  "This device is already configured.",
+                                 "no_devices_found":  "No VCX-Knob devices were found.",
+                                 "scan_failed":  "Bluetooth scan failed.",
+                                 "pairing_failed":  "Pairing with {device_address} failed: {error_message}"
+                             }
+               },
+    "entity":  {
+                   "sensor":  {
+                                  "device_address":  {
+                                                         "name":  "Bluetooth Address"
+                                                     },
+                                  "rssi":  {
+                                               "name":  "Signal Strength"
+                                           },
+                                  "air_percentage":  {
+                                                         "name":  "Dryer Output"
+                                                     },
+                                  "water_percentage":  {
+                                                           "name":  "Water Output"
+                                                       },
+                                  "radar_level":  {
+                                                      "name":  "Radar Level"
+                                                  },
+                                  "cover_close_time":  {
+                                                           "name":  "Lid Close Time"
+                                                       },
+                                  "cover_flip_intensity":  {
+                                                               "name":  "Lid Opening Intensity"
+                                                           },
+                                  "ring_flip_intensity":  {
+                                                              "name":  "Seat Opening Intensity"
+                                                          },
+                                  "cover_close_intensity":  {
+                                                                "name":  "Lid Closing Intensity"
+                                                            },
+                                  "ring_close_intensity":  {
+                                                               "name":  "Seat Closing Intensity"
+                                                           },
+                                  "bubble_level":  {
+                                                       "name":  "Bubble Level"
+                                                   },
+                                  "big_flush_water":  {
+                                                          "name":  "Big Flush Duration"
+                                                      },
+                                  "small_flush_water":  {
+                                                            "name":  "Small Flush Duration"
+                                                        },
+                                  "small_flush_up":  {
+                                                         "name":  "Small Flush Upper Phase"
+                                                     },
+                                  "foot_sensor_distance":  {
+                                                               "name":  "Foot Sensor Distance"
+                                                           },
+                                  "sterilization_time":  {
+                                                             "name":  "Sterilization Time"
+                                                         },
+                                  "water_pressure":  {
+                                                         "name":  "Water Pressure"
+                                                     },
+                                  "ambient_light_brightness":  {
+                                                                   "name":  "Ambient Light Brightness"
+                                                               }
+                              },
+                   "switch":  {
+                                  "radar":  {
+                                                "name":  "Radar"
+                                            },
+                                  "voice":  {
+                                                "name":  "Voice Control"
+                                            },
+                                  "sensor":  {
+                                                 "name":  "Sensors"
+                                             },
+                                  "auto_mode":  {
+                                                    "name":  "Automatic Mode"
+                                                },
+                                  "night_light":  {
+                                                      "name":  "Night Light"
+                                                  },
+                                  "foot_sensor":  {
+                                                      "name":  "Foot Sensor"
+                                                  },
+                                  "sterilization":  {
+                                                        "name":  "Sterilization"
+                                                    }
+                              },
+                   "button":  {
+                                  "small_flush":  {
+                                                      "name":  "Small Flush"
+                                                  },
+                                  "feminine_wash":  {
+                                                        "name":  "Feminine Wash"
+                                                    },
+                                  "rear_wash":  {
+                                                    "name":  "Rear Wash"
+                                                },
+                                  "massage":  {
+                                                  "name":  "Massage"
+                                              },
+                                  "stop":  {
+                                               "name":  "Stop"
+                                           },
+                                  "dry":  {
+                                              "name":  "Dry"
+                                          },
+                                  "close":  {
+                                                "name":  "Close"
+                                            },
+                                  "runbi":  {
+                                                "name":  "Pre-wet Bowl"
+                                            },
+                                  "self_clean":  {
+                                                     "name":  "Self Clean"
+                                                 },
+                                  "factory_reset":  {
+                                                        "name":  "Factory Reset"
+                                                    },
+                                  "eco":  {
+                                              "name":  "ECO"
+                                          },
+                                  "open_seat":  {
+                                                    "name":  "Flip Seat"
+                                                },
+                                  "child_wash":  {
+                                                     "name":  "Child Wash"
+                                                 },
+                                  "open_lid":  {
+                                                   "name":  "Flip Lid"
+                                               },
+                                  "auto_mode":  {
+                                                    "name":  "Auto"
+                                                },
+                                  "big_flush":  {
+                                                    "name":  "Flush"
+                                                },
+                                  "power":  {
+                                                "name":  "Power"
+                                            },
+                                  "bubble":  {
+                                                 "name":  "Foam"
+                                             },
+                                  "light":  {
+                                                "name":  "Light"
+                                            }
+                              },
+                   "select":  {
+                                  "water_temperature":  {
+                                                            "name":  "Water Temperature",
+                                                            "state":  {
+                                                                          "off":  "Off",
+                                                                          "34":  "34 °C",
+                                                                          "37":  "37 °C",
+                                                                          "40":  "40 °C"
+                                                                      }
+                                                        },
+                                  "seat_temperature":  {
+                                                           "name":  "Seat Temperature",
+                                                           "state":  {
+                                                                         "off":  "Off",
+                                                                         "34":  "34 °C",
+                                                                         "37":  "37 °C",
+                                                                         "40":  "40 °C"
+                                                                     }
+                                                       },
+                                  "wind_temperature":  {
+                                                           "name":  "Dryer Temperature",
+                                                           "state":  {
+                                                                         "off":  "Off",
+                                                                         "45":  "45 °C",
+                                                                         "50":  "50 °C",
+                                                                         "55":  "55 °C"
+                                                                     }
+                                                       },
+                                  "water_level":  {
+                                                      "name":  "Water Flow",
+                                                      "state":  {
+                                                                    "off":  "Off",
+                                                                    "low":  "Low",
+                                                                    "medium":  "Medium",
+                                                                    "high":  "High"
+                                                                }
+                                                  },
+                                  "air_level":  {
+                                                    "name":  "Dryer Level",
+                                                    "state":  {
+                                                                  "off":  "Off",
+                                                                  "low":  "Low",
+                                                                  "medium":  "Medium",
+                                                                  "high":  "High"
+                                                              }
+                                                },
+                                  "light_brightness":  {
+                                                           "name":  "Light Brightness",
+                                                           "state":  {
+                                                                         "off":  "Off",
+                                                                         "low":  "Low",
+                                                                         "medium":  "Medium",
+                                                                         "high":  "High"
+                                                                     }
+                                                       },
+                                  "radar_sensitivity":  {
+                                                            "name":  "Radar Sensitivity",
+                                                            "state":  {
+                                                                          "low":  "Low",
+                                                                          "medium":  "Medium",
+                                                                          "high":  "High"
+                                                                      }
+                                                        },
+                                  "water_pressure_level":  {
+                                                               "name":  "Water Pressure",
+                                                               "state":  {
+                                                                             "0":  "Level 0",
+                                                                             "1":  "Level 1",
+                                                                             "2":  "Level 2",
+                                                                             "3":  "Level 3"
+                                                                         }
+                                                           },
+                                  "nozzle_position":  {
+                                                          "name":  "Nozzle Position",
+                                                          "state":  {
+                                                                        "0":  "Level 0",
+                                                                        "1":  "Level 1",
+                                                                        "2":  "Level 2",
+                                                                        "3":  "Level 3"
+                                                                    }
+                                                      }
+                              },
+                   "binary_sensor":  {
+                                         "connection":  {
+                                                            "name":  "Bluetooth Connected"
+                                                        },
+                                         "paired":  {
+                                                        "name":  "Bluetooth Paired"
+                                                    }
+                                     },
+                   "light":  {
+                                 "ambient_light":  {
+                                                       "name":  "Ambient RGB Light"
+                                                   }
+                             }
+               },
+    "services":  {
+                     "pair_bluetooth_device":  {
+                                                   "name":  "Pair Bluetooth Device",
+                                                   "description":  "Pair and trust a VCX-Knob Bluetooth device. Administrator only.",
+                                                   "fields":  {
+                                                                  "device_address":  {
+                                                                                         "name":  "Device MAC address",
+                                                                                         "description":  "Bluetooth MAC address, for example 88:36:A2:D8:80:AC."
+                                                                                     },
+                                                                  "timeout":  {
+                                                                                  "name":  "Timeout",
+                                                                                  "description":  "Pairing timeout in seconds."
+                                                                              }
+                                                              }
+                                               },
+                     "scan_bluetooth_device":  {
+                                                   "name":  "Scan Bluetooth Devices",
+                                                   "description":  "Scan for nearby matching connectable Bluetooth devices. Administrator only.",
+                                                   "fields":  {
+                                                                  "timeout":  {
+                                                                                  "name":  "Timeout",
+                                                                                  "description":  "Scan duration in seconds."
+                                                                              },
+                                                                  "device_filter":  {
+                                                                                        "name":  "Device name filter",
+                                                                                        "description":  "Case-insensitive text used to filter advertised device names."
+                                                                                    }
+                                                              }
+                                               },
+                     "get_bluetooth_device_info":  {
+                                                       "name":  "Get Bluetooth Device Info",
+                                                       "description":  "Log pairing, trust and connection state for a Bluetooth device. Administrator only.",
+                                                       "fields":  {
+                                                                      "device_address":  {
+                                                                                             "name":  "Device MAC address",
+                                                                                             "description":  "Bluetooth MAC address to query."
+                                                                                         }
+                                                                  }
+                                                   }
+                 }
 }

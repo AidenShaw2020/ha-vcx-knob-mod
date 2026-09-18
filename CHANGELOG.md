@@ -1,5 +1,36 @@
 # Changelog / Přehled změn
 
+## 1.0.13 - protokol podle DM Toilet Control 1.0.6 / app-verified protocol
+
+### CZ
+- Protokol a entity znovu ověřeny přímo z Android aplikace DM Toilet Control 1.0.6.
+- Aplikace používá pouze FFA0/FFA1 pro zápis; FFA2 zůstává pouze volitelný best-effort stavový kanál pro jiné firmware varianty.
+- Odstraněny spekulativní switche a neověřené/destruktivní příkazy z běžných entit.
+- Opraveny příkazy: Power 0E, Light 0F, Self Clean 11, Foam 12, ECO 13, Water Pressure 21, Position 22 a další app-backed akce.
+- `17` se již nevystavuje jako malé spláchnutí; v aplikaci je Self Clean `11`.
+- Teplota sušení opravena na off / 45 / 50 / 55 °C.
+- Přidáno dětské mytí, napájení, světlo, ECO a poloha trysky.
+- Teploty, tlak vody a poloha trysky mají optimistic stav až po úspěšném BLE write.
+- Jednorázové příkazy používají stejný tříbajtový teplotní payload jako DM Toilet Control.
+- Nové setupy přeskakují OS-level `bluetoothctl` pairing; běžné BLE připojení je pro ovládání dostačující.
+- Zavádějící `paired` binary sensor byl odstraněn a staré chybné entity se při upgrade uklidí z Entity Registry.
+- Neověřené FFA2 telemetrické senzory jsou u nových instalací disabled-by-default.
+- Přidáno optimistic ambientní RGB světlo podle app rámce `AA 08 03` a `PROTOCOL-DM-TOILET-CONTROL-1.0.6.md` s auditovatelnou mapou příkazů.
+
+### EN
+- Re-verified the protocol and entity model directly from DM Toilet Control 1.0.6.
+- The app uses FFA0/FFA1 for writes only; FFA2 remains an optional best-effort status channel for firmware variants that report it.
+- Removed speculative switches and unsupported/destructive guessed commands from normal entities.
+- Corrected app-backed commands including Power 0E, Light 0F, Self Clean 11, Foam 12, ECO 13, Water Pressure 21 and Position 22.
+- `17` is no longer exposed as small flush; the app uses Self Clean `11`.
+- Corrected dryer temperature to off / 45 / 50 / 55 °C.
+- Added Child Wash, Power, Light, ECO and Nozzle Position controls.
+- Temperature, water-pressure and nozzle-position selects become optimistic only after a successful BLE write.
+- One-shot actions use the same three-byte temperature payload as DM Toilet Control.
+- New setups skip OS-level `bluetoothctl` pairing; normal BLE connection is sufficient for control.
+- Removed the misleading paired binary sensor and clean up retired incorrect entities from the Entity Registry during upgrade.
+- Unverified FFA2 telemetry sensors are disabled by default on new installs.
+- Added optimistic ambient RGB control using the app `AA 08 03` frame and `PROTOCOL-DM-TOILET-CONTROL-1.0.6.md` with an auditable command map.
 ## 1.0.12 - odstranění FF pollingu a push stav / remove FF polling and use push status
 
 ### CZ

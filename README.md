@@ -29,7 +29,7 @@ Integrace ovládá kompatibilní VCX-Knob / smart-toilet zařízení **lokálně
 
 ### Bezpečnost
 
-Factory reset nech zakázaný, pokud ho opravdu nepotřebuješ. U Home Assistant Container nezvyšuj oprávnění kontejneru jen kvůli této integraci, pokud Bluetooth funguje s užším nastavením.
+U Home Assistant Container nezvyšuj oprávnění kontejneru jen kvůli této integraci, pokud Bluetooth funguje s užším nastavením. Nepodložené nebo destruktivní upstream příkazy nejsou v app-backed sadě entit vystavené.
 
 Podrobnosti jsou v [SECURITY.md](SECURITY.md).
 
@@ -60,7 +60,7 @@ The integration controls compatible VCX-Knob / smart-toilet devices **locally ov
 
 ### Security
 
-Keep Factory Reset disabled unless you explicitly need it. For Home Assistant Container, avoid granting broader container privileges solely for this integration if Bluetooth works with narrower permissions.
+For Home Assistant Container, avoid granting broader container privileges solely for this integration if Bluetooth works with narrower permissions. Unsupported or destructive upstream guesses are not exposed in the app-backed entity set.
 
 See [SECURITY.md](SECURITY.md).
 

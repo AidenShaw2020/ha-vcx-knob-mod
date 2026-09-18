@@ -82,6 +82,13 @@ from .const import (
     CONF_AUTO_CONNECT,
     CONF_DEVICE_ADDRESS,
     CONF_DEVICE_NAME,
+    APP_DEFAULT_NOZZLE_POSITION_LEVEL,
+    APP_DEFAULT_SEAT_TEMP_CODE,
+    APP_DEFAULT_WATER_PRESSURE_LEVEL,
+    APP_DEFAULT_WATER_TEMP_CODE,
+    APP_DEFAULT_WIND_TEMP_CODE,
+    APP_LEVEL_STATE_KEYS,
+    APP_TEMPERATURE_STATE_KEYS,
     DEFAULT_AUTO_CONNECT,
     DEFAULT_CONNECTION_TIMEOUT,
     DEFAULT_SCAN_TIMEOUT,
@@ -360,23 +367,15 @@ class VCXKnobBLEClient:
                 self._is_connected = False
                 self._disconnect_time = asyncio.get_event_loop().time()
 
-    async def send_command(
-        self,
-        cmd: str,
-        d1: int = 0,
-        d2: int = 0,
-        d3: int = 0,
-    ) -> None:
-        """Send one VCX-Knob command."""
+    async def _write_frame(self, frame: bytes) -> None:
+        """Write one already-built protocol frame to FFA1."""
         if not self.is_connected or self._client is None:
             raise VCXKnobConnectionError(
                 "Not connected to device",
                 retryable=True,
             )
 
-        command = build_command(cmd, d1, d2, d3)
-        _LOGGER.debug("Sending command: %s", command.hex().upper())
-
+        _LOGGER.debug("Sending frame: %s", frame.hex().upper())
         try:
             write_char = self._client.services.get_characteristic(
                 BLE_WRITE_CHARACTERISTIC_UUID
@@ -413,7 +412,7 @@ class VCXKnobBLEClient:
             async with asyncio.timeout(10):
                 await self._client.write_gatt_char(
                     write_char,
-                    command,
+                    frame,
                     response=use_response,
                 )
         except asyncio.TimeoutError as err:
@@ -429,6 +428,27 @@ class VCXKnobBLEClient:
                 retryable=True,
             ) from err
 
+    async def send_command(
+        self,
+        cmd: str,
+        d1: int = 0,
+        d2: int = 0,
+        d3: int = 0,
+    ) -> None:
+        """Send one normal AA 08 02 command."""
+        await self._write_frame(build_command(cmd, d1, d2, d3))
+
+    async def send_ambient_command(
+        self,
+        mode: int,
+        red: int,
+        green: int,
+        blue: int,
+    ) -> None:
+        """Send one AA 08 03 ambient-light command."""
+        await self._write_frame(
+            build_ambient_command(mode, red, green, blue)
+        )
     def _notification_handler(self, _sender: object, data: bytearray) -> None:
         """Reassemble fragmented BLE notifications into 8-byte status packets."""
         raw = bytes(data)
@@ -521,11 +541,17 @@ class VCXKnobCoordinator(DataUpdateCoordinator[dict]):
 
         self._device_state: dict[str, bool | int | str | None] = {
             "connected": False,
-            "paired": False,
             "rssi": None,
             "device_address": self.device_address,  # 添加设备地址到状态
         }
 
+        self._command_state: dict[str, int] = {
+            "water_temp_code": APP_DEFAULT_WATER_TEMP_CODE,
+            "wind_temp_code": APP_DEFAULT_WIND_TEMP_CODE,
+            "seat_temp_code": APP_DEFAULT_SEAT_TEMP_CODE,
+            "water_pressure_level": APP_DEFAULT_WATER_PRESSURE_LEVEL,
+            "nozzle_position_level": APP_DEFAULT_NOZZLE_POSITION_LEVEL,
+        }
         # 监听 Home Assistant 关闭事件
         config_entry.async_on_unload(
             hass.bus.async_listen_once(EVENT_HOMEASSISTANT_STOP, self._async_shutdown)
@@ -537,10 +563,6 @@ class VCXKnobCoordinator(DataUpdateCoordinator[dict]):
             name=DOMAIN,
             update_interval=timedelta(seconds=self._poll_interval),
         )
-
-
-        # 检查配对状态
-        hass.async_create_task(self._async_check_paired_status())
 
     @property
     def client(self) -> VCXKnobBLEClient:
@@ -561,36 +583,6 @@ class VCXKnobCoordinator(DataUpdateCoordinator[dict]):
     def auto_connect(self) -> bool:
         """获取是否自动连接配置"""
         return self._config_entry.data.get(CONF_AUTO_CONNECT, DEFAULT_AUTO_CONNECT)
-
-    async def _async_check_paired_status(self) -> None:
-        """检查蓝牙设备配对状态"""
-        try:
-            process = await asyncio.create_subprocess_exec(
-                "bluetoothctl",
-                "info",
-                self.device_address,
-                stdout=asyncio.subprocess.PIPE,
-                stderr=asyncio.subprocess.PIPE,
-            )
-
-            stdout, stderr = await asyncio.wait_for(process.communicate(), timeout=5.0)
-            result = stdout.decode() + stderr.decode()
-
-            # 解析配对状态
-            paired = "Paired: yes" in result
-            self._device_state["paired"] = paired
-            _LOGGER.debug("设备 %s 配对状态: %s", self.device_address, paired)
-
-        except asyncio.TimeoutError:
-            _LOGGER.warning("检查配对状态超时: %s", self.device_address)
-            self._device_state["paired"] = False
-        except FileNotFoundError:
-            # 蓝牙命令不可用（可能不在 Linux 上）
-            _LOGGER.debug("bluetoothctl 不可用，无法检查配对状态")
-            self._device_state["paired"] = True  # 假设已配对
-        except Exception as err:
-            _LOGGER.warning("检查配对状态时出错: %s", err)
-            self._device_state["paired"] = False
 
     async def _async_update_data(self) -> dict:
         """Maintain BLE connection and diagnostic state.
@@ -636,6 +628,15 @@ class VCXKnobCoordinator(DataUpdateCoordinator[dict]):
                 return
 
             self._device_state.update(decoded)
+
+            # FFA2 is optional and is not used by DM Toilet Control 1.0.6.
+            # If a firmware variant does report these values, use them to
+            # correct the optimistic command state.
+            for key in APP_TEMPERATURE_STATE_KEYS | APP_LEVEL_STATE_KEYS:
+                value = decoded.get(key)
+                if value is not None:
+                    self._command_state[key] = int(value)
+
             self._device_state["connected"] = self._client.is_connected
             self._device_state["rssi"] = self._client.rssi
 
@@ -648,6 +649,81 @@ class VCXKnobCoordinator(DataUpdateCoordinator[dict]):
 
         except Exception:
             _LOGGER.exception("Failed to process VCX-Knob status notification")
+    def _app_temperature_payload(self) -> tuple[int, int, int]:
+        """Return the temperature tuple used by DM Toilet Control 1.0.6."""
+        return (
+            self._command_state["water_temp_code"],
+            self._command_state["wind_temp_code"],
+            self._command_state["seat_temp_code"],
+        )
+
+    @callback
+    def restore_app_value(self, state_key: str, value: int) -> None:
+        """Restore an assumed app-side setting without writing to the toilet."""
+        if state_key in APP_TEMPERATURE_STATE_KEYS | APP_LEVEL_STATE_KEYS:
+            self._command_state[state_key] = value
+            self._device_state[state_key] = value
+
+    def _publish_optimistic_value(self, state_key: str, value: int) -> None:
+        """Publish a locally known value after a successful BLE write."""
+        self._device_state[state_key] = value
+        self.async_set_updated_data(self._device_state.copy())
+
+    async def async_send_app_action(self, cmd: str) -> None:
+        """Send a one-shot command exactly like DM Toilet Control 1.0.6."""
+        d1, d2, d3 = self._app_temperature_payload()
+        await self._client.send_command(cmd, d1, d2, d3)
+
+    async def async_set_app_temperature(
+        self,
+        state_key: str,
+        cmd: str,
+        code: int,
+    ) -> None:
+        """Set one temperature using the app's three-value command payload."""
+        if state_key not in APP_TEMPERATURE_STATE_KEYS:
+            raise ValueError(f"Unsupported temperature state key: {state_key}")
+
+        previous = self._command_state[state_key]
+        self._command_state[state_key] = code
+        try:
+            d1, d2, d3 = self._app_temperature_payload()
+            await self._client.send_command(cmd, d1, d2, d3)
+        except Exception:
+            self._command_state[state_key] = previous
+            raise
+
+        self._publish_optimistic_value(state_key, code)
+
+    async def async_set_app_level(
+        self,
+        state_key: str,
+        cmd: str,
+        code: int,
+    ) -> None:
+        """Set water pressure or nozzle position using D1 only."""
+        if state_key not in APP_LEVEL_STATE_KEYS:
+            raise ValueError(f"Unsupported level state key: {state_key}")
+
+        previous = self._command_state[state_key]
+        self._command_state[state_key] = code
+        try:
+            await self._client.send_command(cmd, code, 0, 0)
+        except Exception:
+            self._command_state[state_key] = previous
+            raise
+
+        self._publish_optimistic_value(state_key, code)
+
+    async def async_send_ambient_light(
+        self,
+        mode: int,
+        red: int,
+        green: int,
+        blue: int,
+    ) -> None:
+        """Send the app-verified ambient RGB frame."""
+        await self._client.send_ambient_command(mode, red, green, blue)
     async def async_send_command(
         self,
         cmd: str,

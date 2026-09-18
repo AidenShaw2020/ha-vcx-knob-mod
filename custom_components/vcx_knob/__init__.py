@@ -21,6 +21,7 @@ PLATFORMS: Final = [
     Platform.BUTTON,
     Platform.SELECT,
     Platform.BINARY_SENSOR,
+    Platform.LIGHT,
 ]
 
 

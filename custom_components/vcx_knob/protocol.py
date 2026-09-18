@@ -110,6 +110,41 @@ def build_command(
     return frame
 
 
+def build_ambient_command(
+    mode: int,
+    red: int,
+    green: int,
+    blue: int,
+) -> bytes:
+    """Build the AA 08 03 ambient RGB frame used by DM Toilet Control."""
+    values = [mode, red, green, blue]
+    if any(value < 0 or value > 255 for value in values):
+        raise ValueError("Ambient command values must be in range 0..255")
+
+    checksum = (
+        PROTOCOL_HEADER
+        + PROTOCOL_LENGTH
+        + 0x03
+        + mode
+        + red
+        + green
+        + blue
+    ) & CHECKSUM_MASK
+    frame = bytes(
+        [
+            PROTOCOL_HEADER,
+            PROTOCOL_LENGTH,
+            0x03,
+            mode,
+            red,
+            green,
+            blue,
+            checksum,
+        ]
+    )
+    _LOGGER.debug("Built ambient command: %s", frame.hex().upper())
+    return frame
+
 def parse_status_packet(data: bytes) -> dict | None:
     """解析从设备接收的状态数据包
 
@@ -280,7 +315,7 @@ def decode_type_02_packet(data1: int, data2: int, data3: int) -> dict:
 
     温度码 (通过 levelToTemp 映射):
     - 水/座: 0=关闭, 1=34°C, 2=37°C, 3=40°C
-    - 风: 0=关闭, 1=40°C, 2=45°C, 3=50°C
+    - 风: 0=关闭, 1=45°C, 2=50°C, 3=55°C
 
     Args:
         data1: 包含水量档位(高3位)和风温档位(中间3位)的第一个数据字节
@@ -308,12 +343,16 @@ def decode_type_02_packet(data1: int, data2: int, data3: int) -> dict:
 
     return {
         "water_level": water_level,
+        "water_temp_code": water_level,
         "water_temp_value": water_temp_value,
         "wind_level": wind_level,
+        "wind_temp_code": wind_level,
         "wind_temp_value": wind_temp_value,
         "seat_level": seat_level,
+        "seat_temp_code": seat_level,
         "seat_temp_value": seat_temp_value,
         "water_pressure": water_pressure,
+        "water_pressure_level": water_pressure,
         "ambient_light_brightness": ambient_light_brightness * 10,  # 值需要乘以10
     }
 

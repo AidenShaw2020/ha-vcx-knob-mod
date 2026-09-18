@@ -156,7 +156,7 @@ class VCXKnobConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         # 如果只发现一个设备，自动选择它，然后进入配对步骤
         if len(self._discovered_devices) == 1:
             self._selected_device = next(iter(self._discovered_devices.values()))
-            return await self.async_step_pair()
+            return await self.async_step_confirm()
 
         # 显示设备选择
         return await self.async_step_select_device()
@@ -202,7 +202,7 @@ class VCXKnobConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         # 如果只发现一个设备，自动选择它，然后进入配对步骤
         if len(self._discovered_devices) == 1:
             self._selected_device = next(iter(self._discovered_devices.values()))
-            return await self.async_step_pair()
+            return await self.async_step_confirm()
 
         # 显示设备选择
         return await self.async_step_select_device()
@@ -291,7 +291,7 @@ class VCXKnobConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             await self.async_set_unique_id(self._selected_device.address)
             self._abort_if_unique_id_configured()
 
-            return await self.async_step_pair()
+            return await self.async_step_confirm()
 
         # 构建选择模式
         devices_dict = {
@@ -580,7 +580,7 @@ class VCXKnobConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         )
 
         # 进入配对步骤
-        return await self.async_step_pair()
+        return await self.async_step_confirm()
 
 
 # ============================================================================
