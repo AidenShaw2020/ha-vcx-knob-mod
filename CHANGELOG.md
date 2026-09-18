@@ -1,5 +1,26 @@
 # Changelog / Přehled změn
 
+## 1.0.12 - odstranění FF pollingu a push stav / remove FF polling and use push status
+
+### CZ
+- Odstraněno periodické odesílání `AA0802FF000000B3`.
+- Přímý test přes nRF Connect potvrdil, že zařízení po tomto příkazu nevrací žádný stavový paket.
+- 30s coordinator refresh nyní pouze udržuje BLE připojení a RSSI a neposílá žádný řídicí příkaz.
+- Odstraněna 10s čekací smyčka na 6 stavových paketů.
+- Kompletní 8bajtové `AA0888...` pakety z FFA2 se nyní předávají coordinatoru okamžitě.
+- Coordinator dekóduje push paket a aktualizuje entity přes `async_set_updated_data()`.
+- Opraven původní no-op notification callback v `__init__.py`, který spontánní FFA2 stav zahazoval.
+- `iot_class` změněn na `local_push`.
+
+### EN
+- Removed periodic transmission of `AA0802FF000000B3`.
+- Direct nRF Connect testing confirmed that the device returns no status packet after this command.
+- The 30-second coordinator refresh now only maintains BLE connectivity and RSSI and sends no control command.
+- Removed the 10-second wait loop for six status packets.
+- Complete 8-byte `AA0888...` packets from FFA2 are now delivered to the coordinator immediately.
+- The coordinator decodes push packets and updates entities through `async_set_updated_data()`.
+- Fixed the original no-op notification callback in `__init__.py` that discarded spontaneous FFA2 status.
+- Changed `iot_class` to `local_push`.
 ## 1.0.11 - správný GATT write režim / correct GATT write mode
 
 ### CZ

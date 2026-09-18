@@ -468,11 +468,14 @@ class VCXKnobBLEClient:
             self._status_buffer.append(packet_hex)
             _LOGGER.debug("Reassembled status packet: %s", packet_hex)
 
+            # Deliver only complete protocol packets to the coordinator.
+            try:
+                self._notification_callback(packet)
+            except Exception:
+                _LOGGER.exception("Status notification callback failed")
+
         if len(self._status_buffer) > 100:
             self._status_buffer = self._status_buffer[-100:]
-
-        self._notification_callback(raw)
-
     def get_status_buffer(self) -> list[str]:
         """Return complete status packets received so far."""
         return self._status_buffer.copy()
@@ -590,107 +593,61 @@ class VCXKnobCoordinator(DataUpdateCoordinator[dict]):
             self._device_state["paired"] = False
 
     async def _async_update_data(self) -> dict:
-        """通过查询状态更新设备状态
+        """Maintain BLE connection and diagnostic state.
 
-        此方法:
-        1. 检查 auto_connect 配置
-        2. 如果启用自动连接，确保已连接并查询状态
-        3. 如果禁用自动连接，仅返回当前状态（扫描模式）
-
-        Returns:
-            当前设备状态字典
-
-        Raises:
-            UpdateFailed: 如果更新失败
+        VCX-Knob status is handled asynchronously from FFA2 notifications.
+        The periodic coordinator refresh only maintains connectivity and RSSI;
+        it deliberately sends no device command.
         """
-        # 如果禁用自动连接，处于扫描模式，不进行状态查询
         if not self.auto_connect:
-            # 扫描模式下，仅更新连接状态为 False
             self._device_state["connected"] = False
             return self._device_state.copy()
 
         try:
-            # 确保我们已连接
             if not self._client.is_connected:
                 _LOGGER.info("设备已断开，尝试重新连接...")
                 await self._client.connect()
 
-            # 更新 RSSI
             self._device_state["rssi"] = self._client.rssi
-
-            # 清空缓冲区以接收新状态
-            self._client.clear_status_buffer()
-
-            # 发送状态查询命令 (ZHUANGTAI = "FF")
-            await self._client.send_command("FF", 0, 0, 0)
-
-            # 等待状态包（所有 6 种类型）
-            await self._async_wait_for_status_packets()
-
-            # 更新连接状态
             self._device_state["connected"] = True
-
             return self._device_state.copy()
 
         except VCXKnobConnectionError as err:
             self._device_state["connected"] = False
             if err.retryable:
                 _LOGGER.warning("连接错误（将重试）: %s", err)
-                # 返回带有 connected=False 的当前状态
                 return self._device_state.copy()
-            else:
-                raise UpdateFailed(f"不可重试的连接错误: {err}") from err
+            raise UpdateFailed(f"不可重试的连接错误: {err}") from err
 
         except Exception as err:
             self._device_state["connected"] = False
             raise UpdateFailed(f"更新失败: {err}") from err
 
-    async def _async_wait_for_status_packets(
-        self,
-        timeout: float = 10.0,
-    ) -> None:
-        """等待所有状态包被接收
+    @callback
+    def handle_status_packet(self, data: bytes) -> None:
+        """Decode one complete FFA2 status packet and notify HA entities."""
+        try:
+            packet = parse_status_packet(data)
+            if packet is None:
+                return
 
-        Args:
-            timeout: 最大等待时间（秒）
-        """
-        received_types = set()
-        start_time = asyncio.get_event_loop().time()
+            decoded = decode_status_packet(packet)
+            if decoded is None:
+                return
 
-        while asyncio.get_event_loop().time() - start_time < timeout:
-            buffer = self._client.get_status_buffer()
+            self._device_state.update(decoded)
+            self._device_state["connected"] = self._client.is_connected
+            self._device_state["rssi"] = self._client.rssi
 
-            for hex_str in buffer:
-                try:
-                    data = bytes.fromhex(hex_str)
-                    packet = parse_status_packet(data)
-
-                    if packet:
-                        packet_type = packet["type"]
-                        if packet_type not in received_types:
-                            received_types.add(packet_type)
-
-                            # 解码并合并状态
-                            decoded = decode_status_packet(packet)
-                            if decoded:
-                                self._device_state.update(decoded)
-
-                except Exception as err:
-                    _LOGGER.debug("解析状态数据包时出错: %s", err)
-
-            # 检查是否接收到所有 6 种数据包类型
-            if len(received_types) >= 6:
-                _LOGGER.debug("接收到全部 6 种状态数据包类型")
-                break
-
-            await asyncio.sleep(0.2)
-
-        if len(received_types) < 6:
             _LOGGER.debug(
-                "仅接收到 %d / 6 种状态数据包类型",
-                len(received_types),
+                "Applied push status packet type=%s decoded=%s",
+                packet.get("type"),
+                decoded,
             )
+            self.async_set_updated_data(self._device_state.copy())
 
+        except Exception:
+            _LOGGER.exception("Failed to process VCX-Knob status notification")
     async def async_send_command(
         self,
         cmd: str,

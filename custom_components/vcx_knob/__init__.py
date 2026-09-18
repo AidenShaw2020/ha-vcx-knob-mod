@@ -40,10 +40,12 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         _LOGGER.error("Configuration entry does not contain a Bluetooth device address")
         return False
 
-    def _notification_callback(data: bytes) -> None:
-        # Status notifications are consumed by the coordinator's polling flow.
-        return None
+    coordinator: VCXKnobCoordinator | None = None
 
+    def _notification_callback(data: bytes) -> None:
+        """Forward one complete FFA2 packet to the coordinator."""
+        if coordinator is not None:
+            coordinator.handle_status_packet(data)
     client = VCXKnobBLEClient(
         hass=hass,
         address=device_address,
