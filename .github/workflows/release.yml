@@ -1,4 +1,4 @@
-﻿name: Release
+name: Release
 
 on:
   push:
@@ -24,8 +24,6 @@ jobs:
           python3 -m json.tool custom_components/vcx_knob/translations/cs.json >/dev/null
 
       - name: Build HACS release archive
-        # HACS extracts zip_release directly into /config/custom_components/vcx_knob.
-        # Files therefore MUST be at the ZIP root.
         run: |
           cd custom_components/vcx_knob
           zip -r ../../vcx_knob.zip .
@@ -34,11 +32,14 @@ jobs:
         run: |
           python3 - <<'PY'
           import zipfile
-          with zipfile.ZipFile("vcx_knob.zip") as z:
-              names = set(z.namelist())
+
+          with zipfile.ZipFile("vcx_knob.zip") as archive:
+              names = set(archive.namelist())
               assert "manifest.json" in names, "manifest.json must be at ZIP root"
               assert "__init__.py" in names, "__init__.py must be at ZIP root"
-              assert not any(n.startswith("vcx_knob/") for n in names), "nested vcx_knob/ directory is invalid"
+              assert not any(name.startswith("vcx_knob/") for name in names), (
+                  "nested vcx_knob/ directory is invalid for HACS zip_release"
+              )
           PY
 
       - name: Create GitHub release
