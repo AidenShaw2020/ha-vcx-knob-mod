@@ -1,5 +1,24 @@
 # Changelog / Přehled změn
 
+## 1.0.10 - úplná oprava BLE helperů / complete BLE helper fix
+
+### CZ
+- Opraven chybějící import `establish_connection`.
+- `async_ble_device_from_address` a `async_last_service_info` se volají přes modul `homeassistant.components.bluetooth`.
+- Odstraněn paralelní background `_async_initial_connect()`, takže inicializace BLE probíhá jedinou cestou přes coordinator refresh.
+- Odstraněna již nepoužívaná metoda `_async_initial_connect`.
+- Nahrazen neexistující `async_get_service_info_from_name` za `async_last_service_info`.
+- Opraven `bluetooth.Change` na `bluetooth.BluetoothChange`.
+- GitHub Actions nově kontroluje Ruff `F821` a nevydá release s nedefinovaným Python jménem.
+
+### EN
+- Added the missing `establish_connection` import.
+- `async_ble_device_from_address` and `async_last_service_info` are accessed through Home Assistant's Bluetooth module.
+- Removed the parallel `_async_initial_connect()` background task so BLE initialization has one path through coordinator refresh.
+- Removed the now-unused `_async_initial_connect` method.
+- Replaced obsolete `async_get_service_info_from_name` with `async_last_service_info`.
+- Fixed `bluetooth.Change` to `bluetooth.BluetoothChange`.
+- GitHub Actions now runs Ruff `F821` and blocks releases containing undefined Python names.
 ## 1.0.9 - oprava předání Home Assistant instance / Home Assistant instance wiring fix
 
 ### CZ
