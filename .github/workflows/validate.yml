@@ -14,8 +14,15 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
       - name: Compile Python
         run: python3 -m compileall -q custom_components/vcx_knob
+
+      - name: Check undefined Python names
+        run: |
+          python3 -m pip install --disable-pip-version-check --quiet ruff
+          ruff check custom_components/vcx_knob --select F821
+
       - name: Validate JSON
         run: |
           python3 -m json.tool custom_components/vcx_knob/manifest.json >/dev/null

@@ -62,6 +62,7 @@ from typing import Final
 import voluptuous as vol
 from bleak import BleakClient, BleakError
 from bleak.exc import BleakDBusError
+from bleak_retry_connector import establish_connection
 from homeassistant.components import bluetooth
 from homeassistant.components.bluetooth import (
     BluetoothServiceInfo,
@@ -193,7 +194,7 @@ class VCXKnobBLEClient:
     def rssi(self) -> int | None:
         """Return the latest RSSI seen by Home Assistant."""
         try:
-            service_info = async_last_service_info(
+            service_info = bluetooth.async_last_service_info(
                 self._hass,
                 self._address,
                 True,
@@ -241,7 +242,7 @@ class VCXKnobBLEClient:
                 if cooldown_remaining > 0:
                     await asyncio.sleep(cooldown_remaining)
 
-            ble_device = async_ble_device_from_address(
+            ble_device = bluetooth.async_ble_device_from_address(
                 self._hass,
                 self._address,
                 connectable=True,
@@ -512,8 +513,6 @@ class VCXKnobCoordinator(DataUpdateCoordinator[dict]):
             update_interval=timedelta(seconds=self._poll_interval),
         )
 
-        # 开始连接
-        hass.async_create_task(self._async_initial_connect())
 
         # 检查配对状态
         hass.async_create_task(self._async_check_paired_status())
@@ -567,30 +566,6 @@ class VCXKnobCoordinator(DataUpdateCoordinator[dict]):
         except Exception as err:
             _LOGGER.warning("检查配对状态时出错: %s", err)
             self._device_state["paired"] = False
-
-    async def _async_initial_connect(self) -> None:
-        """执行与设备的初始连接
-
-        根据 auto_connect 配置决定是否立即连接：
-        - True: 自动连接设备（默认）
-        - False: 仅扫描模式，不自动连接
-        """
-        if not self.auto_connect:
-            _LOGGER.info(
-                "自动连接已禁用，设备将保持扫描模式。"
-                "请使用服务或手动触发连接。"
-            )
-            self._device_state["connected"] = False
-            return
-
-        try:
-            await self._client.connect()
-            self._device_state["connected"] = True
-            self._device_state["rssi"] = self._client.rssi
-            _LOGGER.info("初始连接成功")
-        except VCXKnobConnectionError as err:
-            _LOGGER.error("初始连接失败: %s", err)
-            self._device_state["connected"] = False
 
     async def _async_update_data(self) -> dict:
         """通过查询状态更新设备状态
@@ -749,7 +724,7 @@ async def async_get_ble_device(
     Returns:
         如果找到返回 BluetoothServiceInfo，否则返回 None
     """
-    return bluetooth.async_get_service_info_from_name(hass, address)
+    return bluetooth.async_last_service_info(hass, address, connectable=True)
 
 
 async def async_scan_for_device(
@@ -773,7 +748,7 @@ async def async_scan_for_device(
 
     def _service_info_callback(
         service_info: BluetoothServiceInfo,
-        _change: bluetooth.Change,
+        _change: bluetooth.BluetoothChange,
     ) -> None:
         """BLE 扫描器回调"""
         if service_info.name and name_filter in service_info.name:

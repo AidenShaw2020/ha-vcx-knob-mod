@@ -18,6 +18,8 @@ jobs:
       - name: Validate Python and JSON
         run: |
           python3 -m compileall -q custom_components/vcx_knob
+          python3 -m pip install --disable-pip-version-check --quiet ruff
+          ruff check custom_components/vcx_knob --select F821
           python3 -m json.tool custom_components/vcx_knob/manifest.json >/dev/null
           python3 -m json.tool custom_components/vcx_knob/strings.json >/dev/null
           python3 -m json.tool custom_components/vcx_knob/translations/en.json >/dev/null
