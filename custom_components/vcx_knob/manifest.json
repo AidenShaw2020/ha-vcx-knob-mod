@@ -9,10 +9,10 @@
                          "bluetooth"
                      ],
     "documentation":  "https://github.com/AidenShaw2020/ha-vcx-knob-mod",
-    "iot_class":  "local_polling",
+    "iot_class":  "local_push",
     "issue_tracker":  "https://github.com/AidenShaw2020/ha-vcx-knob-mod/issues",
     "requirements":  [
 
                      ],
-    "version":  "1.0.11"
+    "version":  "1.0.12"
 }
