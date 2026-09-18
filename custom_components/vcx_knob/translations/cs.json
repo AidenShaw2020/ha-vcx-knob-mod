@@ -32,12 +32,12 @@
     },
     "error": {
       "cannot_connect": "K zařízení se nepodařilo připojit. Zkontroluj napájení, dosah a párování.",
-      "no_devices_found": "Nebyla nalezena žádná zařízení {device_name}.",
+      "no_devices_found": "Nebyla nalezena žádná zařízení VCX-Knob.",
       "scan_failed": "Vyhledávání Bluetooth selhalo. Zkontroluj integraci Bluetooth v Home Assistantu."
     },
     "abort": {
       "already_configured": "Toto zařízení už je nastavené.",
-      "no_devices_found": "Nebyla nalezena žádná zařízení {device_name}.",
+      "no_devices_found": "Nebyla nalezena žádná zařízení VCX-Knob.",
       "scan_failed": "Vyhledávání Bluetooth selhalo.",
       "pairing_failed": "Párování s {device_address} selhalo: {error_message}"
     }

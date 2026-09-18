@@ -1,3 +1,16 @@
+# Changelog / Přehled změn
+
+## 1.0.6 - oprava config-flow překladu / config-flow translation fix
+
+### CZ
+- Opravena chyba FormatJS `MISSING_VALUE` při nenalezení žádného zařízení.
+- Překlad `no_devices_found` již nevyžaduje placeholder `{device_name}`, protože abort větev config flow jej neposílá.
+- Oprava je provedena v `strings.json`, `translations/cs.json` a `translations/en.json`.
+
+### EN
+- Fixed the FormatJS `MISSING_VALUE` error when no device is found.
+- The `no_devices_found` translation no longer requires the `{device_name}` placeholder because the abort branch of the config flow does not provide it.
+- The fix is applied to `strings.json`, `translations/cs.json`, and `translations/en.json`.
 # Changelog / PĹ™ehled zmÄ›n
 
 ## 1.0.5 - HACS a UTF-8 hotfix
