@@ -501,6 +501,7 @@ class VCXKnobConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             raise VCXKnobConnectionError("未选择设备")
 
         client = VCXKnobBLEClient(
+            hass=self.hass,
             address=self._selected_device.address,
             name=self._selected_device.name,
             notification_callback=lambda data: None,
