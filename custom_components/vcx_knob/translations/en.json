@@ -32,12 +32,12 @@
     },
     "error": {
       "cannot_connect": "Could not connect to the device. Check power, range and pairing.",
-      "no_devices_found": "No {device_name} devices were found.",
+      "no_devices_found": "No VCX-Knob devices were found.",
       "scan_failed": "Bluetooth scan failed. Check the Home Assistant Bluetooth integration."
     },
     "abort": {
       "already_configured": "This device is already configured.",
-      "no_devices_found": "No {device_name} devices were found.",
+      "no_devices_found": "No VCX-Knob devices were found.",
       "scan_failed": "Bluetooth scan failed.",
       "pairing_failed": "Pairing with {device_address} failed: {error_message}"
     }
