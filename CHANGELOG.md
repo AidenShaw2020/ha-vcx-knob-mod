@@ -1,5 +1,16 @@
 # Changelog / Přehled změn
 
+## 1.0.7 - runtime-safe oprava config flow / runtime-safe config-flow fix
+
+### CZ
+- `async_abort(reason="no_devices_found")` nyní vždy předává `device_name`.
+- Oprava funguje i v případě, že Home Assistant stále drží starší překladovou šablonu v cache.
+- Překlady `no_devices_found` zároveň zůstávají bez povinného placeholderu.
+
+### EN
+- `async_abort(reason="no_devices_found")` now always provides `device_name`.
+- This also protects against an older translation template still being cached by Home Assistant.
+- `no_devices_found` translations remain placeholder-free as an additional safeguard.
 ## 1.0.6 - oprava config-flow překladu / config-flow translation fix
 
 ### CZ

@@ -148,7 +148,10 @@ class VCXKnobConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
         # 检查是否发现任何设备
         if not self._discovered_devices:
-            return self.async_abort(reason="no_devices_found")
+            return self.async_abort(
+                reason="no_devices_found",
+                description_placeholders={"device_name": BLE_DEVICE_NAME_FILTER},
+            )
 
         # 如果只发现一个设备，自动选择它，然后进入配对步骤
         if len(self._discovered_devices) == 1:
