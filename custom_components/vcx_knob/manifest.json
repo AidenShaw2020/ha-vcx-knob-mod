@@ -1,0 +1,18 @@
+{
+  "domain": "vcx_knob",
+  "name": "VCX-Knob Smart Toilet (Hardened)",
+  "codeowners": [
+    "@AidenShaw2020"
+  ],
+  "config_flow": true,
+  "dependencies": [
+    "bluetooth"
+  ],
+  "documentation": "https://github.com/AidenShaw2020/ha-vcx-knob-mod",
+  "iot_class": "local_polling",
+  "issue_tracker": "https://github.com/AidenShaw2020/ha-vcx-knob-mod/issues",
+  "requirements": [
+    "bleak>=0.21.0"
+  ],
+  "version": "1.0.3-mod.1"
+}

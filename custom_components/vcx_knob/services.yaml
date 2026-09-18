@@ -1,0 +1,39 @@
+pair_bluetooth_device:
+  fields:
+    device_address:
+      required: true
+      selector:
+        text:
+    timeout:
+      required: false
+      default: 15
+      selector:
+        number:
+          min: 5
+          max: 60
+          step: 1
+          unit_of_measurement: s
+
+scan_bluetooth_device:
+  fields:
+    timeout:
+      required: false
+      default: 10
+      selector:
+        number:
+          min: 5
+          max: 60
+          step: 1
+          unit_of_measurement: s
+    device_filter:
+      required: false
+      default: VCX
+      selector:
+        text:
+
+get_bluetooth_device_info:
+  fields:
+    device_address:
+      required: true
+      selector:
+        text:

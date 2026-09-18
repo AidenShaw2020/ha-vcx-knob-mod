@@ -1,0 +1,7 @@
+{
+  "name": "VCX-Knob Smart Toilet (Hardened)",
+  "render_readme": true,
+  "homeassistant": "2024.1",
+  "zip_release": true,
+  "filename": "vcx_knob.zip"
+}
