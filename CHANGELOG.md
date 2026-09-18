@@ -1,5 +1,20 @@
 # Changelog / Přehled změn
 
+## 1.0.9 - oprava předání Home Assistant instance / Home Assistant instance wiring fix
+
+### CZ
+- Opraven pád `VCXKnobBLEClient.__init__() missing 1 required positional argument: 'hass'`.
+- `async_setup_entry()` nyní předává klientovi `hass=hass`.
+- Testovací připojení v config flow nyní předává `hass=self.hass`.
+- Po vytvoření coordinatoru se provede okamžitý první refresh stavu před načtením entit.
+- Přidána validační kontrola, aby v repozitáři nezůstalo volání nového BLE klienta bez parametru `hass`.
+
+### EN
+- Fixed `VCXKnobBLEClient.__init__() missing 1 required positional argument: 'hass'`.
+- `async_setup_entry()` now passes `hass=hass`.
+- The config-flow connection test now passes `hass=self.hass`.
+- An immediate coordinator refresh is performed before entity platforms are forwarded.
+- Added validation to catch calls to the new BLE client that omit `hass`.
 ## 1.0.8 - BLE proxy a stavová data / BLE proxy and status data
 
 ### CZ
